@@ -1,0 +1,10 @@
+$(info "tools.armv5tel included")
+
+CAT=cat
+OBJCOPY=objcopy
+STRIP=strip
+LD=ld
+AS=as
+GCC=gcc
+GXX=g++
+

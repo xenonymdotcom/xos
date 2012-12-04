@@ -1,0 +1,14 @@
+The mailbox protocol as reversed engineered from the bare metal code 
+consder the mailbox to be a WORD (32 bit) stream
+[0] byte length of buffer (which may contain many requests)
+[1] 0 (requests) no info on the other values
+..... then the requests
+[n+0] command tag
+[n+1] command responce buffer size (in bytes)
+[n+2] command request value length
+[n+3] first word of request/responce
+...
+[n+3+len-1] last word of request/responce.
+[m=n+3+len] first work of next command
+
+command == 0 is end of request tag.

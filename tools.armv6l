@@ -1,0 +1,10 @@
+$(info "tools.armv6l included")
+
+CAT=cat
+OBJCOPY=objcopy
+STRIP=strip
+LD=ld
+AS=as
+GCC=gcc
+GXX=g++
+

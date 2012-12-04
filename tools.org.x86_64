@@ -1,0 +1,11 @@
+$(info "tools.x86_64 included")
+EXE_PREFIX=arm-linux-gnueabihf-
+CAT=cat
+OBJCOPY=$(EXE_PREFIX)objcopy
+STRIP=$(EXE_PREFIX)strip
+LD=$(EXE_PREFIX)ld
+AS=$(EXE_PREFIX)as
+GCC=$(EXE_PREFIX)gcc
+GXX=$(EXE_PREFIX)g++
+
+

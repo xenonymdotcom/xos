@@ -1,0 +1,15 @@
+This is a placemarker and tempary holdall for my operating system
+The basic idea is to build a simple layered kernel.
+the lowest layer will be a bit like a hal (hardware abstraction layer) and be written in C with as little asm as possible 
+the next layer up may be written in C++ and at some later date something more like D/Vala with Garbage collection.
+My current Ideas are;
+- To write an API similar to Posix but NOT.
+- Not to have Swap (it complicated things and I'm not convinced its good as it hides programs that consume lots of memory)
+    however I do think that Mem-Mapping files is good, and may even say that this is the way to get access to read only files 
+    writing to a memmapped file poses some issues we will see.
+- All config etc will be in YAML (or JSON [which is compatable but simpler])
+- It will initially be Raspberry PI only, then move to ODroid-X or Hackberry (or Via APC) [or ...] 
+    I do not intend porting to x86/x86_64
+    I would like to get it ARM_64 if I can find a sim/dev board.
+
+
