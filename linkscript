@@ -27,7 +27,13 @@ MEMORY
 SECTIONS
 {
 	.text : { start.o(.text) *(.text*) } >kernel
-	.ro : { *(.ro*) } >kernel
+	.ro : { 
+	    _init_array_start = .;
+        *(.init_array)
+        *(SORT(.init_array.*))
+    	_init_array_end = .;
+		*(.ro*) 
+	} >kernel
 	.arm : { *(.ARM.exidx*) } >kernel
 	.attrs : { *(.ARM.attributes) } >kernel
 	.bss : { *(.bss*) } >kernel

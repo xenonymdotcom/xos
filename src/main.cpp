@@ -23,16 +23,16 @@ void dump_reg( int r0, int r1, int r2, int r3 )
 	getCPU( &cpu );
 
 	console_write( COLOUR_PUSH BG_MAGENTA BG_HALF FG_GREEN );
- 	console_write(    "R0:0x");  console_write( tohex(cpu.r0,4) );
- 	console_write(   " R1:0x");  console_write( tohex(cpu.r1,4) );
- 	console_write(   " R2:0x");  console_write( tohex(cpu.r2,4) );
- 	console_write(   " R3:0x");  console_write( tohex(cpu.r3,4) );
- 	console_write(  "\nR4:0x");  console_write( tohex(cpu.r4,4) );
- 	console_write(   " R5:0x");  console_write( tohex(cpu.r5,4) );
- 	console_write(   " R6:0x");  console_write( tohex(cpu.r6,4) );
- 	console_write(   " R7:0x");  console_write( tohex(cpu.r7,4) );
- 	console_write(  "\nR8:0x");  console_write( tohex(cpu.r8,4) );
- 	console_write(   " R9:0x");  console_write( tohex(cpu.r9,4) );
+ 	console_write(   " R0:0x"); console_write( tohex(cpu.r0,4) );
+ 	console_write(  "  R1:0x"); console_write( tohex(cpu.r1,4) );
+ 	console_write(  "  R2:0x"); console_write( tohex(cpu.r2,4) );
+ 	console_write(  "  R3:0x"); console_write( tohex(cpu.r3,4) );
+ 	console_write( "\n R4:0x"); console_write( tohex(cpu.r4,4) );
+ 	console_write(  "  R5:0x"); console_write( tohex(cpu.r5,4) );
+ 	console_write(  "  R6:0x"); console_write( tohex(cpu.r6,4) );
+ 	console_write(  "  R7:0x"); console_write( tohex(cpu.r7,4) );
+ 	console_write( "\n R8:0x"); console_write( tohex(cpu.r8,4) );
+ 	console_write(  "  R9:0x"); console_write( tohex(cpu.r9,4) );
  	console_write(  " R10:0x"); console_write( tohex(cpu.r10,4) );
  	console_write(  " R11:0x"); console_write( tohex(cpu.r11,4) );
  	console_write( "\nR12:0x"); console_write( tohex(cpu.r12,4) );
@@ -76,8 +76,18 @@ void dump_reg( int r0, int r1, int r2, int r3 )
 	console_write( COLOUR_POP "\n" );
 }
 
+typedef void (*constructor_t)(void);
+extern constructor_t _init_array_start[];
+extern constructor_t _init_array_end[];
+
 extern "C" void main(void)
 {
+/*
+    constructor_t *fn = _init_array_start;
+	    while(fn < _init_array_end) {
+	   (*fn++)();
+	    }
+*/
 	fb_init();
 
 	console_write( COLOUR_PUSH BG_BLUE BG_HALF FG_CYAN "more stuff" COLOUR_POP "\n" );

@@ -27,7 +27,50 @@ namespace platform {
 namespace board {
 namespace rpi {
 
-unsigned int mailbox_read(unsigned int channel)
+unsigned int p_mailbox_read(unsigned int channel);
+void p_mailbox_write(unsigned int channel, unsigned int * data);
+
+unsigned int mailbox_read(unsigned int channel) { return p_mailbox_read(channel); }
+void mailbox_write(unsigned int channel, unsigned int * data) { p_mailbox_write( channel, data);}
+
+
+/*
+template<int channel> class NumberedMailBox : public MailBox
+{
+public:
+	virtual uint32_t read() { return p_mailbox_read( channel ); }
+	virtual void write(uint32_t* data) {  p_mailbox_write(channel, data); }
+};
+*/
+MailBox nullMailBox;
+/*
+NumberedMailBox<8> fbMailBox;
+
+MailBox::~MailBox(){}
+
+uint32_t MailBox::read() { return ~0; }
+
+void MailBox::write(uint32_t* data) { }
+*/
+uint32_t  MailBox::read() { return p_mailbox_read( 8 ); }
+void  MailBox::write(uint32_t* data) {  p_mailbox_write(8, data); }
+
+MailBox& MailBox::getMailBox(int channel)
+{
+/*
+	switch (channel)
+	{
+	case 8:
+		return fbMailBox;
+	default:
+		return nullMailBox;
+	}
+*/
+	return nullMailBox;
+}
+
+
+unsigned int p_mailbox_read(unsigned int channel)
 {
 	unsigned int count = 0;
 	unsigned int data;
@@ -54,7 +97,7 @@ unsigned int mailbox_read(unsigned int channel)
 	return ~0;
 }
 
-void mailbox_write(unsigned int channel, unsigned int * data)
+void p_mailbox_write(unsigned int channel, unsigned int * data)
 {
 	// Wait for mailbox to be not full
 	while (*MAILBOX0STATUS & MAILBOX_FULL)
