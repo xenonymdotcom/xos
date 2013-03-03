@@ -11,3 +11,10 @@
 *.lai
 *.la
 *.a
+
+# editor backup files
+*~
+
+#build output
+*.img
+*.elf
