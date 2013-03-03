@@ -65,6 +65,21 @@ namespace platform {
 namespace board {
 namespace rpi {
 
+/* Current console text cursor position (ie. where the next character will
+ * be written
+*/
+static unsigned int consx = 0;
+static unsigned int consy = 0;
+
+/* Current fg/bg colour */
+static unsigned short int fgcolour = 0xffff;
+static unsigned short int bgcolour = 0;
+
+/* A small stack to allow temporary colour changes in text */
+static unsigned int colour_stack[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+static unsigned int colour_sp = 8;
+
+
 void fb_init(void)
 {
 	unsigned int var;
@@ -187,7 +202,15 @@ void fb_init(void)
 	/* Need to set up max_x/max_y before using console_write */
 	max_x = fb_x / CHARSIZE_X;
 	max_y = fb_y / CHARSIZE_Y;
-
+	
+	// init the internal vars (not sure the linker is setting this up right yet)
+	consx = 0;
+	consy = 0;
+	fgcolour = 0xffff;
+	bgcolour = 0;
+	colour_sp = 8;
+	
+	// write debug message to screen
 	console_write(COLOUR_PUSH BG_BLUE BG_HALF FG_CYAN
 			"Framebuffer initialised. Address = 0x");
 	console_write(tohex(screenbase, sizeof(screenbase)));
@@ -200,94 +223,18 @@ void fb_init(void)
 	console_write(COLOUR_POP "\n");
 }
 
-/* Current console text cursor position (ie. where the next character will
- * be written
-*/
-static unsigned int consx = 0;
-static unsigned int consy = 0;
-
-/* Current fg/bg colour */
-static unsigned short int fgcolour = 0xffff;
-static unsigned short int bgcolour = 0;
-
-/* A small stack to allow temporary colour changes in text */
-static unsigned int colour_stack[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-static unsigned int colour_sp = 8;
-
-/* Write null-terminated text to the console
- * Supports control characters (see framebuffer.h) for colour and newline
- */
-void console_write(char const *text)
+void print_char(unsigned char ch )
 {
 	volatile unsigned short int *ptr;
 
 	unsigned int row, addr;
 	int col;
-	unsigned char ch;
+	
+	// bounds check the char
+	ch -= 32;
+	if( ch > 127 ) { ch = 0; }
 
-	/* Double parentheses to silence compiler warnings about
-	 * assignments as boolean values
-	 */
-	while((ch = (unsigned char)*text))
-	{
-		text++;
-
-		/* Deal with control codes */
-		switch(ch)
-		{
-			case 1: fgcolour = 0b1111100000000000; continue;
-			case 2: fgcolour = 0b0000011111100000; continue;
-			case 3: fgcolour = 0b0000000000011111; continue;
-			case 4: fgcolour = 0b1111111111100000; continue;
-			case 5: fgcolour = 0b1111100000011111; continue;
-			case 6: fgcolour = 0b0000011111111111; continue;
-			case 7: fgcolour = 0b1111111111111111; continue;
-			case 8: fgcolour = 0b0000000000000000; continue;
-				/* Half brightness */
-			case 9: fgcolour = (fgcolour >> 1) & 0b0111101111101111; continue;
-			case 10: consx=0; consy++; continue;
-			case 11: /* Colour stack push */
-				if(colour_sp)
-					colour_sp--;
-				colour_stack[colour_sp] =
-					fgcolour | (bgcolour<<16);
-				continue;
-			case 12: /* Colour stack pop */
-				fgcolour = colour_stack[colour_sp] & 0xffff;
-				bgcolour = colour_stack[colour_sp] >> 16;
-				if(colour_sp<8)
-					colour_sp++;
-				continue;
-			case 17: bgcolour = 0b1111100000000000; continue;
-			case 18: bgcolour = 0b0000011111100000; continue;
-			case 19: bgcolour = 0b0000000000011111; continue;
-			case 20: bgcolour = 0b1111111111100000; continue;
-			case 21: bgcolour = 0b1111100000011111; continue;
-			case 22: bgcolour = 0b0000011111111111; continue;
-			case 23: bgcolour = 0b1111111111111111; continue;
-			case 24: bgcolour = 0b0000000000000000; continue;
-				/* Half brightness */
-			case 25: bgcolour = (bgcolour >> 1) & 0b0111101111101111; continue;
-		}
-
-		/* Unknown control codes, and anything >127, get turned into
-		 * spaces. Anything >=32 <=127 gets 32 subtracted from it to
-		 * turn it into a value between 0 and 95, to index into the
-		 * character definitions table
-		 */
-		if(ch<32)
-		{
-			ch=0;
-		}
-		else
-		{
-			if(ch>127)
-				ch=0;
-			else
-				ch-=32;
-		}
-
-		for(row=0; row<10; row++)
+	for(row=0; row<10; row++)
 		{
 			addr = (row+consy*10)*pitch + consx*6*2;
 
@@ -306,15 +253,67 @@ void console_write(char const *text)
 			ptr = (unsigned short int *)(screenbase+addr);
 			*ptr = bgcolour;
 		}
+}
 
-		if(++consx >= max_x)
+/* Write null-terminated text to the console
+ * Supports control characters (see framebuffer.h) for colour and newline
+ */
+void console_write(char const *text)
+{
+	unsigned char ch;
+
+	while( (ch = (unsigned char)*text) != 0 )
+	{
+		++text;
+
+		/* Deal with control codes */
+		switch(ch)
 		{
-			consx = 0;
-			consy++;
-			if(++consy >= max_y)
+		case 1: fgcolour = 0b1111100000000000; continue;
+		case 2: fgcolour = 0b0000011111100000; continue;
+		case 3: fgcolour = 0b0000000000011111; continue;
+		case 4: fgcolour = 0b1111111111100000; continue;
+		case 5: fgcolour = 0b1111100000011111; continue;
+		case 6: fgcolour = 0b0000011111111111; continue;
+		case 7: fgcolour = 0b1111111111111111; continue;
+		case 8: fgcolour = 0b0000000000000000; continue;
+			/* Half brightness */
+		case 9: fgcolour = (fgcolour >> 1) & 0b0111101111101111; continue;
+		case 10: consx=0; consy++; continue;
+		case 11: /* Colour stack push */
+			if(colour_sp)
+				colour_sp--;
+			colour_stack[colour_sp] =
+				fgcolour | (bgcolour<<16);
+			continue;
+		case 12: /* Colour stack pop */
+			fgcolour = colour_stack[colour_sp] & 0xffff;
+			bgcolour = colour_stack[colour_sp] >> 16;
+			if(colour_sp<8)
+				colour_sp++;
+			continue;
+		case 17: bgcolour = 0b1111100000000000; continue;
+		case 18: bgcolour = 0b0000011111100000; continue;
+		case 19: bgcolour = 0b0000000000011111; continue;
+		case 20: bgcolour = 0b1111111111100000; continue;
+		case 21: bgcolour = 0b1111100000011111; continue;
+		case 22: bgcolour = 0b0000011111111111; continue;
+		case 23: bgcolour = 0b1111111111111111; continue;
+		case 24: bgcolour = 0b0000000000000000; continue;
+				/* Half brightness */
+		case 25: bgcolour = (bgcolour >> 1) & 0b0111101111101111; continue;
+		default:
+			print_char(ch);
+			if(++consx >= max_x)
 			{
-				consy = 0;
+				consx = 0;
+				consy++;
+				if(++consy >= max_y)
+				{
+					consy = 0;
+				}
 			}
+			break;
 		}
 	}
 }
