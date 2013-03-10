@@ -26,13 +26,21 @@ MEMORY
 
 SECTIONS
 {
-	.text : { start.o(.text) *(.text*) } >kernel
-	.ro : { 
-	    _init_array_start = .;
-        *(.init_array)
-        *(SORT(.init_array.*))
-    	_init_array_end = .;
-		*(.ro*) 
+	.text : 
+	{ 
+		start.o (.text) 
+		* (.text*) 
+	} >kernel
+	.init_array : 
+	{
+    _init_array_start = .;
+		KEEP(*(.init_array))
+	    KEEP(*(.init_array*))
+    _init_array_end = .;
+	} > kernel
+	.ro : 
+	{ 
+	    *(.ro*) 
 	} >kernel
 	.arm : { *(.ARM.exidx*) } >kernel
 	.attrs : { *(.ARM.attributes) } >kernel

@@ -8,6 +8,11 @@
  */
 #include <platform/arch/arm/platform.h>
 #include "mailbox.h"
+extern int doSum(int);
+ int doSum(int a)
+ {
+ 	return a +1;
+ }
 
 
 // Mailbox memory addresses

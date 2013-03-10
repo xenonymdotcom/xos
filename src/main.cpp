@@ -80,17 +80,71 @@ typedef void (*constructor_t)(void);
 extern constructor_t _init_array_start[];
 extern constructor_t _init_array_end[];
 
+extern int doSum(int);
+
+class Foo
+{
+public:
+	Foo(int aa=2) : a(doSum(aa)),b(2),c(3),d(4) {}
+int a,b,c,d;
+} FooLocal;
+
+
+Foo foo1(9);
+Foo foo2(8);
+Foo foo3(7);
+
 extern "C" void main(void)
 {
-/*
+	// copature the initial values of foo1 (before the static constructors are called)
+	int a = foo1.a,b=foo1.b,c=foo1.c,d=foo1.d;
+	
+    constructor_t *fn_init = _init_array_start;
+    while(fn_init < _init_array_end) 
+    {
+   		(*fn_init++)();
+    }
+
+	fb_init();
+	console_write( COLOUR_PUSH BG_BLUE BG_HALF FG_CYAN "Foo1 initial" );
+	console_write(  " a:" );	console_write(tohex(a,4));
+	console_write( ", b:" );	console_write(tohex(b,4));
+	console_write( ", c:" );	console_write(tohex(c,4));
+	console_write( ", d:" );	console_write(tohex(d,4));
+	console_write( COLOUR_POP "\n");
+
+	console_write( COLOUR_PUSH BG_BLUE BG_HALF FG_CYAN "Foo1 after");
+	console_write(  " a:" );	console_write(tohex(foo1.a,4));
+	console_write( ", b:" );	console_write(tohex(foo1.b,4));
+	console_write( ", c:" );	console_write(tohex(foo1.c,4));
+	console_write( ", d:" );	console_write(tohex(foo1.d,4));
+	console_write( COLOUR_POP "\n");
+
+
+	console_write( COLOUR_PUSH BG_BLUE BG_HALF FG_CYAN "GCC init_array.*" COLOUR_POP "\n" );
+
     constructor_t *fn = _init_array_start;
 	    while(fn < _init_array_end) {
-	   (*fn++)();
+		console_write( COLOUR_PUSH BG_MAGENTA BG_HALF FG_GREEN );
+		console_write(" FN:");
+		console_write(tohex((int)((void*)fn),4));
+		console_write( COLOUR_POP "\n" );
+		++fn;
 	    }
-*/
-	fb_init();
+	console_write( COLOUR_PUSH BG_BLUE BG_HALF FG_CYAN "FooLocal:" COLOUR_POP "\n" );
+		console_write( COLOUR_PUSH BG_MAGENTA BG_HALF FG_GREEN );
+		console_write(" a:");
+		console_write(tohex(FooLocal.a,4));
+		console_write(" b:");
+		console_write(tohex(FooLocal.b,4));
+		console_write(" c:");
+		console_write(tohex(FooLocal.c,4));
+		console_write(" d:");
+		console_write(tohex(FooLocal.d,4));
+		console_write( COLOUR_POP "\n" );
 
-	console_write( COLOUR_PUSH BG_BLUE BG_HALF FG_CYAN "more stuff" COLOUR_POP "\n" );
+
+	console_write( COLOUR_PUSH BG_BLUE BG_HALF FG_CYAN "Registers:" COLOUR_POP "\n" );
 
 	dump_reg( 0x12345678, 0xc0def00d, 0xdeadbeaf, 0x80000001 );
 
