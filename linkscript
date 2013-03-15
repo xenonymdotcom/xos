@@ -31,6 +31,7 @@ SECTIONS
 		start.o (.text) 
 		* (.text*) 
 	} >kernel
+	
 	.init_array : 
 	{
     _init_array_start = .;
@@ -38,12 +39,27 @@ SECTIONS
 	    KEEP(*(.init_array*))
     _init_array_end = .;
 	} > kernel
+	
 	.ro : 
 	{ 
 	    *(.ro*) 
 	} >kernel
+	
 	.arm : { *(.ARM.exidx*) } >kernel
+	
 	.attrs : { *(.ARM.attributes) } >kernel
-	.bss : { *(.bss*) } >kernel
+	
+	.bss : 
+	{ 
+    _bss_start = .;
+		*(.bss*) 
+    _bss_end = .;
+	} >kernel
+	
 	.data : { *(.data*) } >kernel
+	
+	.heap_start :
+	{
+	    _heap_start = .;
+	} > kernel
 }

@@ -86,7 +86,7 @@ void fb_init(void)
 	unsigned int count;
 	unsigned int * const mailbuffer = (unsigned int *) BUFFER_ADDRESS;
 	
-	// MailBox& mailbox = MailBox::getMailBox(8);
+	MailBox& mailbox = MailBox::getMailBox(8);
 
 	/* Get the display size */
 	mailbuffer[0] = 8 * 4;		// Total size
@@ -98,11 +98,11 @@ void fb_init(void)
 	mailbuffer[6] = 0;		// Space for vertical resolution
 	mailbuffer[7] = 0;		// End tag
 
-	// mailbox.write(mailbuffer);
-	mailbox_write(8, mailbuffer);
+	mailbox.write(mailbuffer);
+	//mailbox_write(8, mailbuffer);
 
-	//var = mailbox.read();
-	var = mailbox_read(8);
+	var = mailbox.read();
+	//var = mailbox_read(8);
 
 	/* Valid response in data structure */
 	if(mailbuffer[1] != 0x80000000)
@@ -147,11 +147,11 @@ void fb_init(void)
 
 	mailbuffer[0] = c*4;		// Buffer size
 
-	//mailbox.write(mailbuffer);
-	mailbox_write(8, mailbuffer);
+	mailbox.write(mailbuffer);
+	//mailbox_write(8, mailbuffer);
 
-	//var = mailbox.read();
-	var = mailbox_read(8);
+	var = mailbox.read();
+	//var = mailbox_read(8);
 
 	/* Valid response in data structure */
 	if(mailbuffer[1] != 0x80000000)
@@ -193,11 +193,11 @@ void fb_init(void)
 	mailbuffer[5] = 0;		// Space for pitch
 	mailbuffer[6] = 0;		// End tag
 
-	//mailbox.write(mailbuffer);
-	mailbox_write(8, mailbuffer);
+	mailbox.write(mailbuffer);
+	//mailbox_write(8, mailbuffer);
 
-	//var = mailbox.read();
-	var = mailbox_read(8);
+	var = mailbox.read();
+	//var = mailbox_read(8);
 
 	/* 4 bytes, plus MSB set to indicate a response */
 	if(mailbuffer[4] != 0x80000004)

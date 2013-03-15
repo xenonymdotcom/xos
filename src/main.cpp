@@ -12,11 +12,41 @@
 #include <platform/arch/arm/cpu.h>
 
 using namespace platform::board::rpi;
-
 extern "C" void __aeabi_unwind_cpp_pr0(void)
 {
 }
 
+extern "C" void __aeabi_atexit(void)
+{
+}
+
+extern "C" void __dso_handle(void)
+{
+}
+
+extern "C" void __cxa_pure_virtual(void)
+{
+	while(1) { ; }
+}
+
+void operator delete(void*foo)
+{
+	return;	
+}
+
+/*
+
+namespace __cxxabiv
+{
+	void __class_type_info() { return; } // (void*)0; }
+	void __si_class_type_info();
+	extern void * vtable;
+	void * vtable;
+
+}
+extern "C" void * vtable;
+void * vtable;
+*/
 void dump_reg( int r0, int r1, int r2, int r3 )
 {
 	CPU cpu;
@@ -79,6 +109,9 @@ void dump_reg( int r0, int r1, int r2, int r3 )
 typedef void (*constructor_t)(void);
 extern constructor_t _init_array_start[];
 extern constructor_t _init_array_end[];
+extern int _bss_start[];
+extern int _bss_end[];
+extern int _heap_start[];
 
 extern int doSum(int);
 
@@ -96,7 +129,9 @@ Foo foo3(7);
 
 extern "C" void main(void)
 {
-	// copature the initial values of foo1 (before the static constructors are called)
+	//blat them
+	foo1.a =0;foo1.b=foo1.c=foo1.d=~0;
+	// capture the initial values of foo1 (before the static constructors are called)
 	int a = foo1.a,b=foo1.b,c=foo1.c,d=foo1.d;
 	
     constructor_t *fn_init = _init_array_start;
@@ -106,7 +141,7 @@ extern "C" void main(void)
     }
 
 	fb_init();
-	console_write( COLOUR_PUSH BG_BLUE BG_HALF FG_CYAN "Foo1 initial" );
+	console_write( COLOUR_PUSH BG_BLUE BG_HALF FG_CYAN "Foo1 initial (blatted)" );
 	console_write(  " a:" );	console_write(tohex(a,4));
 	console_write( ", b:" );	console_write(tohex(b,4));
 	console_write( ", c:" );	console_write(tohex(c,4));
@@ -124,14 +159,26 @@ extern "C" void main(void)
 	console_write( COLOUR_PUSH BG_BLUE BG_HALF FG_CYAN "GCC init_array.*" COLOUR_POP "\n" );
 
     constructor_t *fn = _init_array_start;
-	    while(fn < _init_array_end) {
+    while(fn < _init_array_end) 
+    {
 		console_write( COLOUR_PUSH BG_MAGENTA BG_HALF FG_GREEN );
 		console_write(" FN:");
 		console_write(tohex((int)((void*)fn),4));
 		console_write( COLOUR_POP "\n" );
 		++fn;
-	    }
-	console_write( COLOUR_PUSH BG_BLUE BG_HALF FG_CYAN "FooLocal:" COLOUR_POP "\n" );
+    }
+	    
+		console_write( COLOUR_PUSH BG_BLUE BG_HALF FG_GREEN );
+		console_write(" bss_start:");
+		console_write(tohex((int)((void*)_bss_start),4));
+		console_write(" bss_end:");
+		console_write(tohex((int)((void*)_bss_end),4));
+		console_write(" heap_start:");
+		console_write(tohex((int)((void*)_heap_start),4));
+		
+		console_write( COLOUR_POP "\n" );
+	    
+		console_write( COLOUR_PUSH BG_BLUE BG_HALF FG_CYAN "FooLocal:" COLOUR_POP "\n" );
 		console_write( COLOUR_PUSH BG_MAGENTA BG_HALF FG_GREEN );
 		console_write(" a:");
 		console_write(tohex(FooLocal.a,4));

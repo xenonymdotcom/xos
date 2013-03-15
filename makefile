@@ -13,18 +13,25 @@ include tools.$(PLATFORM)
 
 ASFLAGS=--warn -mcpu=arm1176jzf-s
 CFLAGS=-Wall --std=c99 -O2 -fdata-sections -ffunction-sections -nostdinc -ffreestanding -marm -mcpu=arm1176jzf-s -I./src
-CXXFLAGS=-Wall -std=c++0x -O2 -fdata-sections -ffunction-sections -nostdinc -ffreestanding -marm -mcpu=arm1176jzf-s -I./src
-MAINOBJS=obj/platform/board/rpi/mailbox.o obj/platform/board/rpi/framebuffer.o obj/platform/board/rpi/textutils.o obj/main.o
-OBJS=start.o obj/platform/arch/arm/cpu.o $(MAINOBJS)
-SRCFILES=start.s src/platform/arch/arm/cpu.s $(foreach file,$(MAINOBJS),$(patsubst obj/%.o,src/%.c,$(file)))
+#CXXFLAGS=-Wall -std=c++0x -O2 -fdata-sections -ffunction-sections -nostdinc -ffreestanding -marm -mcpu=arm1176jzf-s -I./src
+CXXFLAGS=-Wall -std=c++0x -O2 -fno-rtti -fno-exceptions -fdata-sections -ffunction-sections -nostdinc -ffreestanding -marm -mcpu=arm1176jzf-s -I./src
 
-$(info "SRCFILES: " $(SRCFILES))
-$(info "OBJS: " $(OBJS))
+RPIBASE=obj/platform/board/rpi
+RPIOBJS=$(RPIBASE)/mailbox.o obj/platform/board/rpi/framebuffer.o obj/platform/board/rpi/textutils.o
+CPUOBJS=obj/platform/arch/arm/cpu.o
+
+MAINOBJS=obj/main.o $(CPUOBJS) $(RPIOBJS)
+OBJS=start.o $(MAINOBJS)
+
+SRCFILES=start.s $(foreach file,$(MAINOBJS),$(patsubst obj/%.o,src/%.c,$(file)))
+
+#$(info "SRCFILES: " $(SRCFILES))
+#$(info "OBJS: " $(OBJS))
 
 all: kernel.img
 
 clean:
-	rm -f *.o kernel.elf kernel.img
+	rm -f $(OBJS) kernel.elf kernel.img
 
 .PHONY: all clean
 
