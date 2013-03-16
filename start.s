@@ -7,4 +7,4 @@ _start:
 	 * stack
 	 */
 	mov sp, #0x8000
-	b main
+	b __main

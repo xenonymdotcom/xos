@@ -26,10 +26,18 @@ CXXFLAGS=-std=c++0x -fno-rtti -fno-exceptions $(COMMONFLAGS) $(MACHINEFLAGS) $(I
 LDFLAGS=-nostdlib -nostartfiles -gc-sections
 
 RPIBASE=obj/platform/board/rpi
-RPIOBJS=$(RPIBASE)/mailbox.o obj/platform/board/rpi/framebuffer.o obj/platform/board/rpi/textutils.o
-CPUOBJS=obj/platform/arch/arm/cpu.o
+RPIFILE=mailbox framebuffer textutils
+RPIOBJS=$(foreach file,$(RPIFILE),$(patsubst %,$(RPIBASE)/%.o,$(file)))
 
-MAINOBJS=obj/main.o $(CPUOBJS) $(RPIOBJS)
+CPUBASE=obj/platform/arch/arm
+CPUFILE=cpu
+CPUOBJS=$(foreach file,$(CPUFILE),$(patsubst %,$(CPUBASE)/%.o,$(file)))
+
+RTLBASE=obj/platform/rtl/startup
+RTLFILE=cxxstartup cxxrtl
+RTLOBJS=$(foreach file,$(RTLFILE),$(patsubst %,$(RTLBASE)/%.o,$(file)))
+
+MAINOBJS=obj/main.o $(RTLOBJS) $(CPUOBJS) $(RPIOBJS)
 OBJS=start.o $(MAINOBJS)
 
 SRCFILES=start.s $(foreach file,$(MAINOBJS),$(patsubst obj/%.o,src/%.c,$(file)))
