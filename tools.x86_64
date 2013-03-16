@@ -1,4 +1,4 @@
-$(info "tools.x86_64 included")
+#$(info "tools.x86_64 included")
 EXE_PREFIX=arm-none-eabi-
 CAT=cat
 OBJCOPY=$(EXE_PREFIX)objcopy
