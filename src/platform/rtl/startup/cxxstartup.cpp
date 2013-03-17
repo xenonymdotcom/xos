@@ -12,6 +12,9 @@
 // main is a C++ NOT C extern 
 extern void main(void);
 
+// then some exit code.
+extern void private_fb_finish(void);
+
 using namespace platform::rtl::startup;
 
 // our startup point is however a extern C as it is called from the asm code.
@@ -35,6 +38,9 @@ extern "C" void __main(void)
 	    }
 	
 		main();
+		
+		// for now call the framebuffer exit code.
+		private_fb_finish();		
 	}
 	return;	
 }
