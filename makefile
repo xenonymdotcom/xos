@@ -15,7 +15,11 @@ include tools.$(PLATFORM)
 INCPATH=./src
 
 INCFLAGS=$(foreach path,$(INCPATH),$(patsubst %,-I%,$(path)))
+<<<<<<< HEAD
 CPUFLAG=-mcpu=arm1176jzf-s -mfpu=vfp -mfloat-abi=hard
+=======
+CPUFLAG=-mcpu=arm1176jzf-s
+>>>>>>> origin
 MACHINEFLAGS=-marm $(CPUFLAG)
 COMMONFLAGS=-Wall -O2 -fdata-sections -ffunction-sections -nostdinc -ffreestanding
 
