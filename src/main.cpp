@@ -47,6 +47,13 @@ namespace __cxxabiv
 extern "C" void * vtable;
 void * vtable;
 */
+double calcSomeStuff( int a, int b )
+{
+	float aa = a*.01f;
+	double bb = b*0.27;
+	return (aa+bb)/34.76;
+}
+
 void dump_reg( int r0, int r1, int r2, int r3 )
 {
 	CPU cpu;
@@ -104,6 +111,12 @@ void dump_reg( int r0, int r1, int r2, int r3 )
 	}
 
 	console_write( COLOUR_POP "\n" );
+	double d = calcSomeStuff( cpu.r0, cpu.r1 );
+	int res = (int)d;
+//	int res = (int)0;
+	console_write( COLOUR_PUSH BG_MAGENTA BG_HALF FG_GREEN "float check:");
+	console_write(tohex(res,4));
+	console_write( COLOUR_POP "\n" );	
 }
 
 typedef void (*constructor_t)(void);
