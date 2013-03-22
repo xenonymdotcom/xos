@@ -13,7 +13,6 @@
 
 using namespace platform::board::rpi;
 
-<<<<<<< HEAD
 /*
 
 namespace __cxxabiv
@@ -34,8 +33,6 @@ double calcSomeStuff( int a, int b )
 	return (aa+bb)/34.76;
 }
 
-=======
->>>>>>> origin
 void dump_reg( int r0, int r1, int r2, int r3 )
 {
 	CPU cpu;

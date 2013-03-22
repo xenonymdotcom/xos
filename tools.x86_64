@@ -1,9 +1,5 @@
 #$(info "tools.x86_64 included")
-<<<<<<< HEAD
 EXE_PREFIX=arm-linux-gnueabihf-
-=======
-EXE_PREFIX=arm-none-eabi-
->>>>>>> origin
 CAT=cat
 OBJCOPY=$(EXE_PREFIX)objcopy
 STRIP=$(EXE_PREFIX)strip
