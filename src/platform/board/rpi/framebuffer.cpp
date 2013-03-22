@@ -220,7 +220,7 @@ void fb_init(void)
 	
 	// write debug message to screen
 	console_write(COLOUR_PUSH BG_BLUE BG_HALF FG_CYAN
-			"Framebuffer initialised. Address = 0x");
+			"Initial Framebuffer initialised. Address = 0x");
 	console_write(tohex(screenbase, sizeof(screenbase)));
 	console_write(", size = 0x");
 	console_write(tohex(screensize, sizeof(screensize)));
@@ -327,3 +327,18 @@ void console_write(char const *text)
 }
 
 } } }
+
+// for now call the framebuffer exit code.
+void private_fb_finish()
+{
+	using namespace platform::board::rpi;
+	
+	console_write(COLOUR_PUSH BG_BLUE BG_HALF FG_CYAN
+			" ** Main has EXITED ** ");
+	console_write(COLOUR_POP "\n");
+	while(true)
+	{
+		// do nothing.
+	}
+}
+

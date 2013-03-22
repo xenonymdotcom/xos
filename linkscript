@@ -19,9 +19,16 @@ MEMORY
  * Make sure start.o comes first, so the entry point is at the start of the
  * file
  *
- * Puts .bss in the middle to force the final binary kernel to contain it;
- * this means it will be set to 0 rather than left to whatever is in the
- * memory beforehand. This isn't very efficient.
+ * the bss is at the end so it does not need to be included in to image
+ *
+ * and finally the heap start so we know where the memory starts that we can write to.
+ *
+ * at present any read/write data is in this same image, realy we should be storing 
+ * the initial data in the image but have the rtl relocate it to a know position so
+ * we can mark the kernel ro/text as read only and then protect it.
+ *
+ * later revs may do this or load up an elf image that it the real kernel.
+ *
  */
 
 SECTIONS
@@ -49,14 +56,14 @@ SECTIONS
 	
 	.attrs : { *(.ARM.attributes) } >kernel
 	
+	.data : { *(.data*) } >kernel
+
 	.bss : 
 	{ 
     _bss_start = .;
 		*(.bss*) 
     _bss_end = .;
 	} >kernel
-	
-	.data : { *(.data*) } >kernel
 	
 	.heap_start :
 	{

@@ -1,4 +1,4 @@
-$(info "tools.x86_64 included")
+$(info "tools.org.x86_64 included")
 EXE_PREFIX=arm-linux-gnueabihf-
 CAT=cat
 OBJCOPY=$(EXE_PREFIX)objcopy
