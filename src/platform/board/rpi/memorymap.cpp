@@ -6,9 +6,6 @@
  * This the interface to the broadcom GPU mailbox.  
  *
  */
-
-#include "textutils.h"
-
 namespace platform { 
 namespace board {
 namespace rpi {
