@@ -1,5 +1,5 @@
 to create a minimul boot image,
-`sudo gparted`  then foramt the whole of a sd card as Fat32 (tries 2G and 4G cards) then set the boot flag (and I sometimes set lba)
+`sudo gparted`  then format the whole of a sd card as Fat32 (tries 2G and 4G cards) then set the boot flag (and I sometimes set lba)
 then copy bootcode.bin and start.elf
 the copy on kernel.img 
 
