@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 mike@xenonym.com
+ * Copyright (c) 2012 github@xenonym.com
  *
  * $Id:$
  *
