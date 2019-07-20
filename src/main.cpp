@@ -9,7 +9,9 @@
 
 #include <platform/board/rpi/framebuffer.h>
 #include <platform/board/rpi/textutils.h>
+#include <platform/board/rpi/uart.h>
 #include <platform/arch/arm/cpu.h>
+#include <platform/rtl/memory/cxxrtl_malloc.h>
 
 using namespace platform::board::rpi;
 
@@ -31,6 +33,26 @@ double calcSomeStuff( int a, int b )
 	float aa = a*.01f;
 	double bb = b*0.27;
 	return (aa+bb)/34.76;
+}
+
+char buffer[256];
+int out_idx=0;
+int in_idx=0;
+
+bool get_from_buffer(char * ptr) {
+	if (in_idx == out_idx) return false;
+	*ptr = buffer[out_idx];
+	out_idx = (out_idx + 1) & 0xFF;
+	return true;
+}
+
+void write_to_buffer(char const * str) {
+	while (*str) {
+		int nxt_in = (in_idx + 1) & 0xFF;
+		if (nxt_in == out_idx) return;
+		buffer[in_idx] = *str++;
+		in_idx = nxt_in;
+	} 
 }
 
 void dump_reg( int r0, int r1, int r2, int r3 )
@@ -93,9 +115,33 @@ void dump_reg( int r0, int r1, int r2, int r3 )
 	double d = calcSomeStuff( cpu.r0, cpu.r1 );
 	int res = (int)d;
 //	int res = (int)0;
-	console_write( COLOUR_PUSH BG_MAGENTA BG_HALF FG_GREEN "float check:0x");
+	console_write( COLOUR_PUSH BG_MAGENTA BG_HALF FG_GREEN "float->int check:0x");
 	console_write(tohex(res,4));
-	console_write( COLOUR_POP "\n" );	
+	console_write( "Recv from UART -->\n:0000:" );
+
+	UART& uart0 = UART::getUART(0);
+	write_to_buffer("hello from XOS\n");
+	int line_count=0;
+	do {
+		if (uart0.has_read_data()) {
+			char c = (char)uart0.read();
+			console_write(c);
+			if (c == '\n') { 
+				write_to_buffer("XOS recv line complete\n");
+				console_write( ":" );
+				console_write(todec(++line_count,4));
+				console_write( ":" );
+			}
+		}
+		if (uart0.can_send_write_data()) {
+			char c;
+			if (get_from_buffer(&c))
+			{
+				uart0.write(c);
+			} 
+		}
+	} while (true);
+	console_write( COLOUR_POP "\n" );
 }
 
 extern int doSum(int);
@@ -112,6 +158,15 @@ Foo foo1(9);
 Foo foo2(8);
 Foo foo3(7);
 
+int new_test() 
+{
+	Foo * fp = new Foo(99);
+	int i = fp->b;
+	delete fp;
+	return i;
+}
+
+
 void main(void)
 {
 	//blat them
@@ -120,6 +175,8 @@ void main(void)
 	int a = foo1.a,b=foo1.b,c=foo1.c,d=foo1.d;
 
 	fb_init();
+	init_UART();
+
 	console_write( COLOUR_PUSH BG_BLUE BG_HALF FG_CYAN "Foo1 initial (blatted)" );
 	console_write(  " a:" );	console_write(tohex(a,4));
 	console_write( ", b:" );	console_write(tohex(b,4));
@@ -134,7 +191,11 @@ void main(void)
 	console_write( ", d:" );	console_write(tohex(foo1.d,4));
 	console_write( COLOUR_POP "\n");
 
-	console_write( COLOUR_POP "\n" );
+	console_write( COLOUR_PUSH BG_BLUE BG_HALF FG_YELLOW "Foo1 after");
+	console_write(  " ntr:" );	console_write(tohex(new_test(),4));
+	console_write( COLOUR_POP "\n");
+	
+
 	    
 	console_write( COLOUR_PUSH BG_BLUE BG_HALF FG_CYAN "FooLocal:" COLOUR_POP "\n" );
 	console_write( COLOUR_PUSH BG_MAGENTA BG_HALF FG_GREEN );

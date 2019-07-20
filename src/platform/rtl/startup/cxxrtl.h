@@ -6,7 +6,7 @@
  * This a minimul C++ runtime library
  *
  */
-#pragma once;
+#pragma once
 
 // these are all linker defines
 namespace platform { 

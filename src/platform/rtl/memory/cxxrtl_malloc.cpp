@@ -18,8 +18,8 @@ namespace MallocStatus
 {
 	enum MallocStatus
 	{
-		End, Free, InUse;
-	}
+		End, Free, InUse
+	};
 }
 
 struct MallocBlock
@@ -31,12 +31,14 @@ struct MallocBlock
 struct AllocatedMallocBlock : public MallocBlock
 {
 	int data[0];
-}
+};
 
 struct FreeMallocBlock : public MallocBlock
 {
 	FreeMallocBlock * nextFree;
-} 
+};
+
+using namespace platform::rtl::startup;
 
 template<int sizeInK> class HeapManager
 {
@@ -64,22 +66,22 @@ public:
 		MallocBlock * nxt = blk->next;
 		if (nxt)
 		{
-			return ((((uint8_t *)nxt)-((uint8_t *)blk)) - sizeof(MallocBlock);
+			return (((uint8_t *)nxt)-((uint8_t *)blk)) - sizeof(MallocBlock);
 		}
 		return 0;		
 	}
 	
 	void * allocate(int requiredLength)
 	{
-		MallocBlock ** blk = &m_freeList;
+		FreeMallocBlock ** blk = &m_freeList;
 		while( calcLength(*blk) < requiredLength )
 		{
-			blk = &((*blk)->next);
+			blk = reinterpret_cast<FreeMallocBlock**>(&((*blk)->next));
 			// exit if we get to then end without finding a block that was long enough
 			if ( !blk ) return 0;
 		}
 		// rethink! we need to walk the free list and then updated the chain.
-		return &((*blk)->data[0]);
+		return &(reinterpret_cast<AllocatedMallocBlock*>(*blk)->data[0]);
 	}
 	
 	void free(void * blk)
@@ -87,11 +89,35 @@ public:
 		MallocBlock * actualBlk = (MallocBlock *)(((uint8_t *)blk)-sizeof(MallocBlock));
 		actualBlk->next = m_freeList;
 		actualBlk->status = MallocStatus::Free;
-		m_freeList = actualBlk;
+		m_freeList = reinterpret_cast<FreeMallocBlock*>(actualBlk);
 	}
 };
 
 HeapManager<128> manager;
 
+// malloc
+void * allocate_memory(int length, bool fill, int fillvalue)
+{
+	void * ptr = manager.allocate(length);
+	if (fill && ptr)
+	{
+		int8_t * mp = reinterpret_cast<int8_t *>(ptr);
+		while(length--)
+		{
+			*mp++ = fillvalue;
+		}
+	}
+	return ptr;
+}
+
+//free
+void free_memory(void* ptr)
+{
+	// it is valid to call free with nullptr
+	if (ptr) { manager.free(ptr); }
+}
+
 } } }
+
+
 

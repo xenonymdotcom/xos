@@ -3,6 +3,8 @@ ifeq "$(PLATFORM)" "x86_64"
   #$(info "using x64 cross compiler tools.")
 else ifeq "$(PLATFORM)" "armv6l"
   #$(info "Arm V6 little endian Native tools.")
+else ifeq "$(PLATFORM)" "armv7l"
+  #$(info "Arm V7 little endian Native tools.")
 else ifeq "$(PLATFORM)" "armv5tel"
   $(error "Arm V5TE little endian Native tools (sheeva plug) not supported.")
 else 
@@ -26,7 +28,7 @@ CXXFLAGS=-std=c++0x -fno-rtti -fno-exceptions $(COMMONFLAGS) $(MACHINEFLAGS) $(I
 LDFLAGS=-nostdlib -nostartfiles -gc-sections
 
 RPIBASE=obj/platform/board/rpi
-RPIFILE=mailbox framebuffer textutils
+RPIFILE=mailbox framebuffer textutils uart
 RPIOBJS=$(foreach file,$(RPIFILE),$(patsubst %,$(RPIBASE)/%.o,$(file)))
 
 CPUBASE=obj/platform/arch/arm
@@ -37,7 +39,11 @@ RTLBASE=obj/platform/rtl/startup
 RTLFILE=cxxstartup cxxrtl
 RTLOBJS=$(foreach file,$(RTLFILE),$(patsubst %,$(RTLBASE)/%.o,$(file)))
 
-MAINOBJS=obj/main.o $(RTLOBJS) $(CPUOBJS) $(RPIOBJS)
+MEMBASE=obj/platform/rtl/memory
+MEMFILE=cxxrtl_malloc
+MEMOBJS=$(foreach file,$(MEMFILE),$(patsubst %,$(MEMBASE)/%.o,$(file)))
+
+MAINOBJS=obj/main.o $(RTLOBJS) $(CPUOBJS) $(RPIOBJS) $(MEMOBJS)
 OBJS=start.o $(MAINOBJS)
 
 SRCFILES=start.s $(foreach file,$(MAINOBJS),$(patsubst obj/%.o,src/%.c,$(file)))

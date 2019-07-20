@@ -6,7 +6,7 @@
  * This a minimul C++ runtime library
  *
  */
-#pragma once;
+#pragma once
 
 namespace platform {
 namespace rtl {
@@ -19,3 +19,4 @@ void * allocate_memory(int length, bool fill = false, int fillvalue=0);
 void free_memory(void* ptr);
 
 }}}
+

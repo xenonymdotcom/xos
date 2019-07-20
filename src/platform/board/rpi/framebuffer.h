@@ -16,6 +16,7 @@ namespace platform
 		{
 			void fb_init(void);
 			void console_write(char const *text);
+			void console_write(char text);
 		}
 	}
 }

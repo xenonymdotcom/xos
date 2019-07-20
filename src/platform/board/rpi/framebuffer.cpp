@@ -228,6 +228,10 @@ void fb_init(void)
 	console_write(todec(fb_x, 0));
 	console_write("x");
 	console_write(todec(fb_y, 0));
+	console_write(", text = ");
+	console_write(todec(max_x, 0));
+	console_write("x");
+	console_write(todec(max_y, 0));
 	console_write(COLOUR_POP "\n");
 }
 
@@ -270,52 +274,57 @@ void console_write(char const *text)
 {
 	unsigned char ch;
 
-	while( (ch = (unsigned char)*text) != 0 )
+	while( (ch = (unsigned char)*text++) != 0 )
 	{
-		++text;
-
 		/* Deal with control codes */
 		switch(ch)
 		{
-		case 1: fgcolour = 0b1111100000000000; continue;
-		case 2: fgcolour = 0b0000011111100000; continue;
-		case 3: fgcolour = 0b0000000000011111; continue;
-		case 4: fgcolour = 0b1111111111100000; continue;
-		case 5: fgcolour = 0b1111100000011111; continue;
-		case 6: fgcolour = 0b0000011111111111; continue;
-		case 7: fgcolour = 0b1111111111111111; continue;
-		case 8: fgcolour = 0b0000000000000000; continue;
+		case 1: fgcolour = 0b1111100000000000; break;
+		case 2: fgcolour = 0b0000011111100000; break;
+		case 3: fgcolour = 0b0000000000011111; break;
+		case 4: fgcolour = 0b1111111111100000; break;
+		case 5: fgcolour = 0b1111100000011111; break;
+		case 6: fgcolour = 0b0000011111111111; break;
+		case 7: fgcolour = 0b1111111111111111; break;
+		case 8: fgcolour = 0b0000000000000000; break;
 			/* Half brightness */
-		case 9: fgcolour = (fgcolour >> 1) & 0b0111101111101111; continue;
-		case 10: consx=0; consy++; continue;
+		case 9: fgcolour = (fgcolour >> 1) & 0b0111101111101111; break;
+		case 10: 
+			consx = 0; 
+			if(++consy >= max_y)
+			{
+				consy = 0;
+			}
+			break;
 		case 11: /* Colour stack push */
 			if(colour_sp)
 				colour_sp--;
 			colour_stack[colour_sp] =
 				fgcolour | (bgcolour<<16);
-			continue;
+			break;
 		case 12: /* Colour stack pop */
-			fgcolour = colour_stack[colour_sp] & 0xffff;
-			bgcolour = colour_stack[colour_sp] >> 16;
 			if(colour_sp<8)
+			{
+				fgcolour = colour_stack[colour_sp] & 0xffff;
+				bgcolour = colour_stack[colour_sp] >> 16;
 				colour_sp++;
-			continue;
-		case 17: bgcolour = 0b1111100000000000; continue;
-		case 18: bgcolour = 0b0000011111100000; continue;
-		case 19: bgcolour = 0b0000000000011111; continue;
-		case 20: bgcolour = 0b1111111111100000; continue;
-		case 21: bgcolour = 0b1111100000011111; continue;
-		case 22: bgcolour = 0b0000011111111111; continue;
-		case 23: bgcolour = 0b1111111111111111; continue;
-		case 24: bgcolour = 0b0000000000000000; continue;
+			}
+			break;
+		case 17: bgcolour = 0b1111100000000000; break;
+		case 18: bgcolour = 0b0000011111100000; break;
+		case 19: bgcolour = 0b0000000000011111; break;
+		case 20: bgcolour = 0b1111111111100000; break;
+		case 21: bgcolour = 0b1111100000011111; break;
+		case 22: bgcolour = 0b0000011111111111; break;
+		case 23: bgcolour = 0b1111111111111111; break;
+		case 24: bgcolour = 0b0000000000000000; break;
 				/* Half brightness */
-		case 25: bgcolour = (bgcolour >> 1) & 0b0111101111101111; continue;
+		case 25: bgcolour = (bgcolour >> 1) & 0b0111101111101111; break;
 		default:
 			print_char(ch);
 			if(++consx >= max_x)
 			{
 				consx = 0;
-				consy++;
 				if(++consy >= max_y)
 				{
 					consy = 0;
@@ -325,6 +334,13 @@ void console_write(char const *text)
 		}
 	}
 }
+
+void console_write(char c)
+{
+	char s[] = {c, '\0'};
+	console_write(s);
+}
+
 
 } } }
 

@@ -7,6 +7,7 @@
  *
  */
 #include "cxxrtl.h"
+#include "../memory/cxxrtl_malloc.h"
 
 extern "C" void __aeabi_unwind_cpp_pr0(void)
 {
@@ -25,8 +26,11 @@ extern "C" void __cxa_pure_virtual(void)
 	while(1) { ; }
 }
 
-void operator delete(void*foo)
-{
-	return;	
+void * operator new(unsigned int len) {
+	return platform::rtl::memory::allocate_memory(len);
 }
 
+void operator delete(void* ptr)
+{
+	platform::rtl::memory::free_memory(ptr);
+}
